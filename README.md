@@ -1,5 +1,7 @@
 This plugin creates a basic form that will take input from user and send the data to the email address configured in the plugin.
 
+Prerequisites: Wordpress website, SMTP Setup on your website to enable sending of emails.
+
 It will also create a table inside your database configured by name - 
     `{wpdb-prefix}-queries` when you activate your plugin and will persist the data into database as well.
 
@@ -12,7 +14,7 @@ The relative path should be -
 
 You can pull or clone the repository in above location and you will be able to find it under the plugins option on your wordpress website. 
 
-**Step 2:** Under your contact us page you can place below text and you should be able to see the form on your webpage - 
+**Step 2:** Under your contact us page you can place below shortcode in your page and you should be able to see the form on your webpage - 
 
 `[contact_form]`
 
