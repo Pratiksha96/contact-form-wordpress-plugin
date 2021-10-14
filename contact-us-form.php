@@ -28,10 +28,10 @@ function on_activate()
 
 function contact_form()
 {
-    /* content variable */
     $content = '';
 
-    $content .= '<form method="post" action="https://localhost/test-site/?page_id=12">';
+    /* Update this link to redirect to the URL after the form is submitted */
+    $content .= '<form method="post" action="http://blogs.ifas.ufl.edu/contact/">';
 
     $content .= '<input type="text" required name="full_name" placeholder="Full Name" />';
     $content .= '<br />';
@@ -69,7 +69,7 @@ function form_capture()
     $time = current_time('mysql');
     $case_number = wp_rand(1,999999);
     if (array_key_exists('submit_form', $_POST)) {
-        $to = "pr.jain@ufl.edu";
+        $to = "webteam@ifas.ufl.edu";
         $subject = "Case Number: ".$case_number ." Testing plugin";
         $body = '';
         $body .= 'Name: ' . $_POST['full_name'] . ' <br /> ';
@@ -95,7 +95,7 @@ function form_capture()
             'author_IP' => $_SERVER['REMOTE_ADDR'],
             'time' => $time
         );
-
+        
         $wpdb->insert($tablename, $data);
     }
 }
