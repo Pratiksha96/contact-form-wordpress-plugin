@@ -11,16 +11,17 @@ function on_activate()
 {
     global $wpdb;
     $create_table_query = "
-            CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}queries` (
-              `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-              `name` varchar(255) NOT NULL,
-              `email` varchar(255) NOT NULL,
-              `phone_number` text NOT NULL,
-              `query` text NOT NULL,
-              `author_IP` text,
-              `time` datetime
-            ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-    ";
+        CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}queries` (
+            `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `name` varchar(255) NOT NULL,
+            `case_number` BIGINT DEFAULT NULL,
+            `email` varchar(255) NOT NULL,
+            `phone_number` text NOT NULL,
+            `query` text NOT NULL,
+            `author_IP` text,
+            `time` datetime,
+            primary key (id)
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;";
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($create_table_query);
 }
@@ -32,19 +33,33 @@ function contact_form()
 
     $content .= '<form method="post" action="https://localhost/test-site/?page_id=12">';
 
-    $content .= '<input type="text" required name="full_name" placeholder="Your Full Name" />';
+    $content .= '<input type="text" required name="full_name" placeholder="Full Name" />';
+    $content .= '<br />';
+
+    $content .= '<input type="text" pattern="^\d{8}" required name="uf_id" placeholder="UF ID" />';
+    $content .= '<br />';
+
+    $content .= '<label for="inquiry-type">Concern:</label> <br />
+                <select name="inquiry-type" id="inquiry-type">
+                <option value="inquiry-type">Blog Request</option>
+                <option value="inquiry-type">General Inquiries</option>
+                <option value="inquiry-type">Technical Inquiries</option>
+                </select>';
     $content .= '<br />';
 
     $content .= '<input type="email" required name="email_address" placeholder="Email Address" />';
     $content .= '<br />';
 
-    $content .= '<input type="tel" required name="phone_number" placeholder="Phone Number" />';
+    $content .= '<input type="tel" pattern="^\+?\d{10,13}" required name="phone_number" placeholder="Phone Number" />';
     $content .= '<br />';
 
     $content .= '<textarea name="query" required placeholder="Please enter your query"></textarea>';
     $content .= '<br />';
 
-    $content .= '<input type="submit" name="submit_form" value="SUBMIT THE INFORMATION" />';
+    $content .= '<input type="file" id="file" name="filename">';
+    $content .= '<br />';
+
+    $content .= '<input type="submit" name="submit_form" value="SUBMIT" />';
 
     $content .= '</form>';
 
@@ -63,53 +78,43 @@ function form_capture()
     global $wpdb;
     $tablename = $wpdb->prefix .'queries';
     $time = current_time('mysql');
-
+    $case_number = wp_rand(1,999999);
     if (array_key_exists('submit_form', $_POST)) {
         $to = "pr.jain@ufl.edu";
-        $subject = "Testing plugin";
+        $subject = "Case Number: ".$case_number ." Testing plugin";
         $body = '';
-
         $body .= 'Name: ' . $_POST['full_name'] . ' <br /> ';
+        $body .= 'UFID: ' . $_POST['uf_id'] . ' <br /> ';
+        $body .= 'Concern Type: ' . $_POST['inquiry-type'] . '<br />';
         $body .= 'Email: ' . $_POST['email_address'] . ' <br /> ';
         $body .= 'Phone: ' . $_POST['phone_number'] . ' <br /> ';
         $body .= 'Query: ' . $_POST['query'] . ' <br /> ';
 
+        $attachments = '';
 
+        if(isset($_POST['file'])) {
+            $attachments = array( WP_CONTENT_DIR . $_POST['file'] );
+        }
+
+        $headers = array('MIME-Version: 1.0','Content-Type: text/html; charset=UTF-8', 'Cc:' . $_POST['email_address']);
+        
         add_filter('wp_mail_content_type', 'set_html_content_type');
 
-        wp_mail($to, $subject, $body);
+        wp_mail($to, $subject, $body, $headers, $attachments);
 
         remove_filter('wp_mail_content_type', 'set_html_content_type');
-    }
 
-    if ( isset( $_POST['submit_form'] ) ){    
-    
-        $data=array(
+        $data = array(
             'name' => $_POST['full_name'],
+            'case_number' => $case_number,
             'email' => $_POST['email_address'],
             'phone_number' => $_POST['phone_number'],
             'query' => $_POST['query'],
             'author_IP' => $_SERVER['REMOTE_ADDR'],
-            'submission_date' => $time
+            'time' => $time
         );
-    
-         $wpdb->insert( $tablename, $data);
+
+        $wpdb->insert($tablename, $data);
     }
-    
-        /* Insert the information into a comment */
-
-    //     $time = current_time('mysql');
-
-    //     $data = array(
-    //         'name' => $_POST['full_name'],
-    //         'email' => $_POST['email_address'],
-    //         'phone_number' => $_POST['phone_number'],
-    //         'query' => $_POST['query'],
-    //         'author_IP' => $_SERVER['REMOTE_ADDR'],
-    //         'submission_date' => $time,
-    //     );
-
-    //     $wpdb->insert($tablename, $data);
-    // }
 }
 add_action('wp_head', 'form_capture');
