@@ -39,14 +39,6 @@ function contact_form()
     $content .= '<input type="text" pattern="^\d{8}" required name="uf_id" placeholder="UF ID" />';
     $content .= '<br />';
 
-    $content .= '<label for="inquiry-type">Concern:</label> <br />
-                <select name="inquiry-type" id="inquiry-type">
-                <option value="inquiry-type">Blog Request</option>
-                <option value="inquiry-type">General Inquiries</option>
-                <option value="inquiry-type">Technical Inquiries</option>
-                </select>';
-    $content .= '<br />';
-
     $content .= '<input type="email" required name="email_address" placeholder="Email Address" />';
     $content .= '<br />';
 
@@ -54,9 +46,6 @@ function contact_form()
     $content .= '<br />';
 
     $content .= '<textarea name="query" required placeholder="Please enter your query"></textarea>';
-    $content .= '<br />';
-
-    $content .= '<input type="file" id="file" name="filename">';
     $content .= '<br />';
 
     $content .= '<input type="submit" name="submit_form" value="SUBMIT" />';
@@ -85,22 +74,15 @@ function form_capture()
         $body = '';
         $body .= 'Name: ' . $_POST['full_name'] . ' <br /> ';
         $body .= 'UFID: ' . $_POST['uf_id'] . ' <br /> ';
-        $body .= 'Concern Type: ' . $_POST['inquiry-type'] . '<br />';
         $body .= 'Email: ' . $_POST['email_address'] . ' <br /> ';
         $body .= 'Phone: ' . $_POST['phone_number'] . ' <br /> ';
         $body .= 'Query: ' . $_POST['query'] . ' <br /> ';
-
-        $attachments = '';
-
-        if(isset($_POST['file'])) {
-            $attachments = array( WP_CONTENT_DIR . $_POST['file'] );
-        }
 
         $headers = array('MIME-Version: 1.0','Content-Type: text/html; charset=UTF-8', 'Cc:' . $_POST['email_address']);
         
         add_filter('wp_mail_content_type', 'set_html_content_type');
 
-        wp_mail($to, $subject, $body, $headers, $attachments);
+        wp_mail($to, $subject, $body, $headers);
 
         remove_filter('wp_mail_content_type', 'set_html_content_type');
 
