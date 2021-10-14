@@ -70,7 +70,7 @@ function form_capture()
     $case_number = wp_rand(1,999999);
     if (array_key_exists('submit_form', $_POST)) {
         $to = "webteam@ifas.ufl.edu";
-        $subject = "Case Number: ".$case_number ." Testing plugin";
+        $subject = "Case Number: ".$case_number ." Inquiry form recieved";
         $body = '';
         $body .= 'Name: ' . $_POST['full_name'] . ' <br /> ';
         $body .= 'UFID: ' . $_POST['uf_id'] . ' <br /> ';
@@ -95,7 +95,7 @@ function form_capture()
             'author_IP' => $_SERVER['REMOTE_ADDR'],
             'time' => $time
         );
-        
+
         $wpdb->insert($tablename, $data);
     }
 }
